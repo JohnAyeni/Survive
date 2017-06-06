@@ -5,4 +5,4 @@
 # Survive
 Dodge the red shapes, 'Space' to kill some red shapes, 'Shift' to hide from them.
 
-Git Page is <a href=""> </a>
+Git Page is <a href="https://lapysnights.github.io/Survive/"> https://lapysnights.github.io/Survive </a>
