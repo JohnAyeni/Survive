@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!-- Document Character Encoding Metadata -->
+    <meta charset="UTF-8">
+    
+    <!-- Document http-equiv Compatibility Metadata -->
+    <meta content="chrome=1, IE=Edge" http-equiv="X-UA-Compatible">
+    
+    <!-- Document Viewport Metadata -->
+    <meta content="height=device-height, initial-scale=1.0, maximum-scale=2.0, minimal-ui, minimum-scale=0.1, user-scalable=no, width=device-width" target-densitydpi="92dpi" name="viewport">
+    
+    <!-- Miscellaneous Metadata -->
+    <meta content="The Lapys Dev Team" name="author">
+
+
+    <!-- LapysJS Stylesheet -->
+    <link href="lapys.css" media="all" rel="stylesheet" type="text/css">
+
+    <!-- Document Stylesheet -->
+    <style type="text/css">
+        /* HTML Elements */
+            /* <body>, <html>, <main> */
+            body,
+            html,
+            main {
+                animation-name: none;
+                overflow-x: hidden;
+                width: 100%
+            }
+
+        /* Components */
+            /* Timer */
+            #timer {
+                background: #FFFFFF;
+                opacity: .3;
+                position: fixed;
+                right: 7.5px;
+                top: 2%;
+                transition: .675s ease-in-out;
+                z-index: 4
+            }
+            #timer:hover {
+                opacity: 1
+            }
+                /* Time */
+                #timer time {
+                    border: 1px solid #808080;
+                    box-shadow: 0 0 5px 0 rgba(0, 0, 0, .5);
+                    cursor: default;
+                    font-size: 50px;
+                    font-weight: normal;
+                    padding: 10px 20px;
+                    text-align: center;
+                    width: 75px
+                }
+
+            /* Statistics */
+            #stats {
+                background: #FFFFFF;
+                border-radius: 5px;
+                box-shadow: 0 0 5px 0 rgba(0, 0, 0, .5);
+                left: 5px;
+                padding: 5px;
+                position: fixed;
+                top: 1%;
+                z-index: 4
+            }
+                /* Statistic */
+                .stat {
+                    display: block;
+                    margin: 10px auto;
+                    width: 100%
+                }
+                    /* Icon */
+                    .stat > * {
+                        border: 5px solid;
+                        border-radius: 50%;
+                        display: block !important;
+                        font-size: 30px;
+                        height: 25px;
+                        margin: 5px auto;
+                        padding: 10px;
+                        text-align: center;
+                        transition: .675s ease-in-out;
+                        width: 25px
+                    }
+                    .stat > [data-used] {
+                        opacity: .3
+                    }
+
+                    /* Hidden */
+                    .stat#hidden > [data-used] {
+                        color: #00CF00
+                    }
+
+                    /* Kill */
+                    .stat#kills > * {
+                        font-size: 32.5px
+                    }
+                    .stat#kills > [data-used] {
+                        color: #FF0000
+                    }
+
+            /* Container */
+            #container {
+                animation: reduce 20s ease-in infinite;
+                box-shadow: 0 0 7.5px 0 rgba(0, 0, 0, .75);
+                display: block;
+                height: 400px;
+                margin: 10px auto;
+                outline: 1px solid #787878;
+                overflow: hidden;
+                transition: .75s ease-in;
+                width: 90%;
+                z-index: -3
+            }
+                @keyframes reduce {
+                    25% {
+                        width: 50%
+                    }
+                    50% {
+                        width: 65%
+                    }
+                    75% {
+                        width: 15%
+                    }
+                }
+
+            /* Shape */
+            .shape {
+                border-radius: 50%;
+                box-shadow: 0 0 5px 0 rgba(0, 0, 0, .75);
+                display: inline-block;
+                height: 40px;
+                left: 5%;
+                opacity: 1;
+                position: absolute;
+                top: 10px;
+                transform: translate(0px, 0px);
+                transition: all .5s ease-in, transform 0s linear;
+                width: 40px
+            }   
+                /* Player */
+                #player:not(.option) {
+                    background-color: #0023FF;
+                    z-index: 2
+                }
+                #player[data-hiding] {
+                    opacity: .3;
+                    outline: 1px solid rgba(127, 127, 127, .5);
+                    outline-offset: 3px
+                }
+                    /* Player Name */
+                    #player:not(.option)::after {
+                        background-color: rgba(0, 0, 0, .9);
+                        color: #FFFFFF;
+                        font-family: "Agency FB", monospace;
+                        font-size: 10px;
+                        opacity: .2;
+                        padding: 3px;
+                        position: absolute;
+                        text-align: center;
+                        transform: translate(7.5px, 45px);
+                        transition: all .5s ease-in, transform 1s linear
+                    }
+                    #player:not(.option)::after:hover {
+                        opacity: 1
+                    }
+
+                /* Enemy */
+                .enemy {
+                    background: #FF0000;
+                    transition: all .5s ease-in, transform 1s linear;
+                    z-index: 1
+                }
+                .enemy[data-AI] {
+                    transition: all .5s ease-in, transform .675s linear
+                }
+
+            /* Spawn Point */
+            #spawnpoint {
+                animation: fadeIn .75s ease-in;
+                background: #333333;
+                border: 2px solid #787878;
+                border-radius: 50%;
+                box-shadow: inset 0 0 15px 0 #000000;
+                height: 30px;
+                opacity: .675;
+                width: 30px;
+                z-index: -1
+            }
+
+            /* Options */
+            #options {
+                display: flex;
+                margin: 50px auto;
+                width: 100%
+            }
+                /* Option */
+                .option {
+                    box-shadow: 0 0 5px 0 rgba(0, 0, 0, .5);
+                    flex-basis: 33%;
+                    flex-grow: 1;
+                    min-height: 100px;
+                }
+                    /* Header */
+                    .option > h2  {
+                        border-bottom: 1px solid #787878;
+                        cursor: default;
+                        font-size: 40px;
+                        font-weight: 300;
+                        padding: 2.5px;
+                        text-indent: 10px;
+                        user-select: none
+                    }
+
+                    /* Form */
+                    .form {
+                        border: 1px solid #808080;
+                        border-radius: 10px;
+                        display: inline-block;
+                        height: 70px;
+                        margin: 10px 15px;
+                        overflow: hidden;
+                        padding: 0;
+                        padding-top: -5px;
+                        user-select: none;
+                        width: 45%
+                    }
+                        /* Header */
+                        .form h3 {
+                            background: #333333;
+                            box-shadow: 0 0 2.5px 0 rgba(0, 0, 0, .675);
+                            color: #FFFFFF;
+                            cursor: default;
+                            display: block;
+                            font-size: 25px;
+                            font-weight: 300;
+                            margin-top: 0;
+                            padding: 5px 10px;
+                            z-index: 3
+                        }
+
+                    /* Game Theme, Player Color */
+                        /* Value */
+                        #gameTheme [type="color"],
+                        #gameTheme [type="color"]:focus,
+                        #playerColor [type="color"],
+                        #playerColor [type="color"]:focus {
+                            border: 0;
+                            border-radius: 0;
+                            box-shadow: none;
+                            height: 50%;
+                            margin-top: -5px;
+                            padding: 0;
+                            width: 100%;
+                            z-index: 2
+                        }
+
+                    /* Player Name */
+                        /* Value */
+                        #playerName input,
+                        #playerName input:focus {
+                            border: 0;
+                            font-size: 20px;
+                            height: 50%;
+                            margin-top: -5px;
+                            outline: 0;
+                            padding-bottom: 10px;
+                            padding-top: 0;
+                            width: 100%
+                        }
+
+                    /* Player Shape */
+                        /* Value */
+                        #playerShape select,
+                        #playerShape select:focus {
+                            border: 0;
+                            cursor: pointer;
+                            font-size: 20px;
+                            height: 50%;
+                            margin-top: -5px;
+                            outline: 0;
+                            padding-bottom: 5px;
+                            padding-top: 0;
+                            width: 100%
+                        }
+
+            /* Hint */
+            #hint button {
+                background: #FFFFFF;
+                border: 1px solid #CFCFCF;
+                border-radius: 50%;
+                bottom: 5px;
+                box-shadow: 0 7.5px 7.5px 0 rgba(0, 0, 0, .6);
+                color: #000000;
+                cursor: pointer;
+                float: right;
+                font-size: 50px;
+                font-weight: 500 !important;
+                height: 85px;
+                margin: 30px auto;
+                outline: 0;
+                padding: 15px;
+                position: fixed;
+                right: 50px;
+                transition: .5s ease;
+                width: 85px;
+                zoom: .75
+            }
+            #hint button:hover {
+                box-shadow: 0 -7.5px 7.5px 0 rgba(0, 0, 0, .6);
+            }
+            #hint button:hover::before {
+                animation:: fadeIn .675s ease-in;
+                background: #FFFFFF;
+                border: 1px solid rgba(0, 0, 0, .5);
+                border-radius: 6px;
+                bottom: 133px;
+                box-shadow: 0 15px 15px 0 rgba(0, 0, 0, .15);
+                content: "'WASD' or 'Arrow Keys' to move, 'Shift' to hide & 'Space' to kill.";
+                color: #000000;
+                font-family: Roboto, sans-serif;
+                font-size: 17.5px;
+                padding: 50px 15px;
+                position: fixed;
+                right: 133px
+            }
+    </style>
+
+    <title> Survival </title>
+</head>
+
+<body style="zoom: .825">
+    <!-- Header -->
+    <h1 class="bdr-b c-k fnt-w-b o-eighth pos-abs txt-a-c zm-3" i style="left: 30%"> Survive!!! </h1>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Timer -->
+        <section id="timer">
+            <time> 0 </time>
+        </section>
+
+        <!-- Stats -->
+        <section id="stats">
+            <!-- Hidden -->
+            <nav class="stat" id="hidden"> 
+                <div class="icn-2-windflag"> </div>
+                <div class="icn-2-windflag"> </div>
+                <div class="icn-2-windflag"> </div>
+            </nav>
+
+            <!-- Kills -->
+            <nav class="stat" id="kills">
+                <div class="icn-2-skullandcrossedbones"> </div>
+                <div class="icn-2-skullandcrossedbones"> </div>
+                <div class="icn-2-skullandcrossedbones"> </div>
+            </nav>
+        </section>
+
+        <!-- Container -->
+        <section id="container">
+            <!-- Player -->
+            <div class="shape" default id="player"> </div>
+
+            <!-- Enemy -->
+            <div class="enemy shape" default left="0" top="0" style="transform: translate(200px, 200px)"> </div>
+        </section>
+
+        <!-- Options -->
+        <section id="options">
+            <!-- Player -->
+            <div class="option" id="player">
+                <!-- Header -->
+                <h2> Player </h2>
+
+                <!-- Color -->
+                <div class="form h-style" id="playerColor">
+                    <h3> Set Player Color </h3>
+
+                    <input type="color" value="#0023FF">
+                </div>
+
+                <!-- Name -->
+                <div class="form h-style" id="playerName">
+                    <h3> Set Player Name </h3>
+
+                    <input placeholder="    Player Name " type="text">
+                </div>
+
+                <!-- Shape -->
+                <div class="form h-style" id="playerShape">
+                    <h3> Select Player Shape </h3>
+
+                    <select type="select-one">
+                        <option> Circle </option>
+                        <option> Square </option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Game -->
+            <div class="option" id="game">
+                <!-- Header -->
+                <h2> Game </h2>
+
+                <!-- Color -->
+                <div class="form h-style" id="gameTheme">
+                    <h3> Set Game Theme </h3>
+
+                    <input type="color" value="#FFFFFF">
+                </div>
+            </div>
+        </section>
+
+        <!-- Hint -->
+        <div id="hint">
+            <button> ? </button>
+        </div>
+    </main>
+
+    <!-- LapysJS Script -->
+    <script language="javascript" src="lapys.js" type="text/javascript"> </script>
+
+    <!-- Document Script -->
+    <script async language="javascript" type="text/javascript">
+        /* Correction */
+            // Styling
+                // .h-style Elements
+                for (i = 0; i < get.html(".h-style").length; i++)
+                    get.html(".h-style", i).style.height = get.html(".h-style", i).clientHeight + "px"
+
+        /* Definition */
+            /* Container */
+            const GAME = get.html("#container")
+
+            /* Player */
+            var player = get.html("#player:not(.option)")
+
+            /* Options */
+            var options = get.html("#options")
+                /* Game */
+                options.game = get.html(".option#game")
+                    /* Theme */
+                    options.game.theme = get.html("#gameTheme")
+                        // Value
+                        options.game.theme.value = get.html('#gameTheme [type="color"]').value
+
+                        // Events
+                        get.html('#gameTheme [type="color"]').oninput = function() {
+                            GAME.style.backgroundColor = this.value
+                        }
+
+                /* Player */
+                options.player = get.html(".option#player")
+                    /* Color */
+                    options.player.color = get.html("#playerColor")
+                        // Value
+                        options.player.color.value = get.html('#playerColor [type="color"]').value
+                        
+                        // Events
+                        get.html('#playerColor [type="color"]').oninput = function() {
+                            player.style.backgroundColor = this.value
+                        }
+
+                    /* Name */
+                    options.player.name = get.html("#playerName")
+                        // Value
+                        options.player.name.value = get.html("#playerName input").value
+                        
+                        // Events
+                        get.html('#playerName input').oninput = function() {
+                            if (!get.html('style[data-key="playerName"]'))
+                                css.style('playerName', '#player:not(.option)::after', 'content: ""')
+
+                            get.html('style[data-key="playerName"]').innerHTML = (
+                                '#player:not(.option)::after {' +
+                                    'content: "' + this.value + '" ' +
+                                '}'
+                            )
+                        }
+
+                    /* Shape */
+                    options.player.shape = get.html("#playerShape")
+                        // Value
+                        options.player.shape.value = get.html("#playerShape select").selectedOptions[0].value
+
+                        // Events
+                        get.html("#playerShape select").oninput = function() {
+                            options.player.shape.value = this.selectedOptions[0].value
+
+                            playerShape()
+                        }
+
+        /* Modification */
+        if (player) {
+            // Player
+                // Player Color
+                player.style.backgroundColor = options.player.color.value
+                player.style.borderColor = options.player.color.value
+
+                // Player Name
+                    // Content
+                    if (dir.fullPath.indexOf("playerName=") >= 0) {
+                        css.style('playerName', '#player:not(.option)::after', 'content: ""')
+
+                        get.html('style[data-key="playerName"]').innerHTML = (
+                            '#player:not(.option)::after {' +
+                                'content: "' + dir.fullPath.slice(dir.fullPath.indexOf("?")).replace("?playerName=", "") + '" ' +
+                            '}'
+                        )
+
+                        get.html("#playerName input").value = dir.fullPath.slice(dir.fullPath.indexOf("?")).replace("?playerName=", "")
+                    }
+
+                    // Display
+                    document.body.onkeydown = function() {
+                        // Arrow Keys
+                        if (event.keyCode > 36 && event.keyCode < 41)
+                            css.style(
+                                "playerNameDisplay",
+                                "#player:not(.option)::after",
+                                "opacity: 0"
+                            )
+
+                        // Any Key
+                        else
+                            del.style("playerNameDisplay")
+                    }
+                    setInterval(function() {
+                        del.style("playerNameDisplay")   
+                    }, 1000)
+
+                // Player Shape
+                function playerShape() {
+                    // Circle
+                    if (options.player.shape.value == "Circle")
+                        player.style.borderRadius = "50%"
+
+                    // Square
+                    else if (options.player.shape.value == "Square")
+                        player.style.borderRadius = 0
+                }
+    
+        /* Functions */
+        set.event(document.body, "keydown", control)
+
+        // Player Co-ordinates
+        setInterval(function() {
+            player.bottom = (function() { return player.getBoundingClientRect().bottom })()
+            player.left = (function() { return player.getBoundingClientRect().left })()
+            player.right = (function() { return player.getBoundingClientRect().right })()
+            player.top = (function() { return player.getBoundingClientRect().top })()
+        }, 1)
+
+        // Player Position
+        player.X = 0
+        player.Y = 0
+
+        // Player Actions
+            // Hide
+            var hidden = 0
+
+            // Kill
+            var kill = 0
+
+        // AI Player
+        setInterval(function() {
+            if (player.getBoundingClientRect().left < GAME.getBoundingClientRect().left) {
+                player.X = (GAME.getBoundingClientRect().left + player.clientWidth)
+                
+                player.style.transform = (
+                    "translate(" + (GAME.getBoundingClientRect().left + player.clientWidth) + "px," + player.getBoundingClientRect().top + "px)"
+                )
+            }
+            else if (player.getBoundingClientRect().right > GAME.getBoundingClientRect().right) {
+                player.X = (GAME.getBoundingClientRect().right - player.clientWidth)
+
+                player.style.transform = (
+                    "translate(" + (GAME.getBoundingClientRect().right - player.clientWidth) + "px," + player.getBoundingClientRect().top + "px)"
+                )
+            }
+        }, 1)
+
+        setInterval(function() {
+            player.style.transition = "all .5s ease-in, transform 2s linear"
+
+            player.style.transform = (
+                "translate(" +
+                    (function() {
+                        return spawnpoint.getBoundingClientRect().left
+                    })() + "px" +
+                "," +
+                    (function() {
+                        return spawnpoint.getBoundingClientRect().top
+                    })() + "px" +
+                ")"
+            )
+
+            setTimeout(function() {
+                player.style.transition = "all .5s ease-in, transform 0s linear"
+            }, 2000)
+        }, 15000)
+
+        // Move Player
+        function control() {
+            // Directional Keys
+                // Down or S
+                if (event.keyCode == 40 || event.keyCode == 83)
+                    if (player.bottom <= GAME.getBoundingClientRect().bottom)
+                        player.Y += (Math.random() * 10)
+
+                // Left Arrow Key or A
+                if (event.keyCode == 37 || event.keyCode == 65)
+                    if (player.left >= GAME.getBoundingClientRect().left)
+                        player.X -= (Math.random() * 10)
+
+                // Right or D
+                if (event.keyCode == 39 || event.keyCode == 68)
+                    if (player.right <= GAME.getBoundingClientRect().right)
+                        player.X += (Math.random() * 10)
+
+                // Up or W
+                if (event.keyCode == 38 || event.keyCode == 87)
+                    if (player.top >= GAME.getBoundingClientRect().top)
+                        player.Y -= (Math.random() * 10)
+
+            // Spacebar
+            if (event.keyCode == 32 && kill < 3) {
+                if (kill == 0)
+                    set.attr(get.html(".stat#kills > *", 0), "data-used")
+                else if (kill == 1)
+                    set.attr(get.html(".stat#kills > *", 1), "data-used")
+                else if (kill == 2)
+                    set.attr(get.html(".stat#kills > *", 2), "data-used")
+
+                kill++
+
+                for (i = 0; i < get.html(".enemy", "_array").length; i++)
+                    if ((Math.random() * 10) < 5) {
+                        get.html(".enemy", i).style.opacity = 0
+
+                        setTimeout(function() { del.html(get.html(".enemy", i)) }, 100)
+                    }
+
+                setTimeout(function() { console.clear() }, 1000)
+            }
+
+            // Shift
+            if (event.keyCode == 16 && hidden < 3) {
+                if (!player.hasAttribute("data-hiding")) {
+                    if (hidden == 0)
+                        set.attr(get.html(".stat#hidden > *", 0), "data-used")
+                    else if (hidden == 1)
+                        set.attr(get.html(".stat#hidden > *", 1), "data-used")
+                    else if (hidden == 2)
+                        set.attr(get.html(".stat#hidden > *", 2), "data-used")
+
+                    hidden++
+
+                    set.attr(player, "data-hiding")
+
+                    setTimeout(function() {
+                        del.attr(player, "data-hiding")
+                    }, 5750)
+                }
+            }
+
+            // Positioning
+            player.style.transform = (
+                "translate(" +
+                    player.X + "px" +
+                    ", " +
+                    player.Y + "px" +
+                ")"
+            )
+        }
+
+        var boolean = false
+        setInterval(function() {
+            if (!boolean) {
+                if (kill == 0)
+                    del.attr(get.html(".stat#kills > *", 0), "data-used")
+                else if (kill == 1)
+                    del.attr(get.html(".stat#kills > *", 1), "data-used")
+                else if (kill == 2)
+                    del.attr(get.html(".stat#kills > *", 2), "data-used")
+
+                kill--
+
+                if (kill <= 0)
+                    kill = 0
+
+                boolean = !boolean
+            } else {
+                boolean = !boolean
+            }
+
+            if (hidden == 0)
+                del.attr(get.html(".stat#hidden > *", 0), "data-used")
+            else if (hidden == 1)
+                del.attr(get.html(".stat#hidden > *", 1), "data-used")
+            else if (hidden == 2)
+                del.attr(get.html(".stat#hidden > *", 2), "data-used")
+
+            hidden--
+
+            if (hidden <= 0)
+                hidden = 0
+        }, 15000)
+
+        /* Spawn */
+            // Definition
+                // Spawn Point
+                var spawnpoint = create("div")
+
+            // Modification
+                // Spawn Point
+                spawnpoint.id = "spawnpoint"
+                setInterval(function() {
+                    spawnpoint.style.transform = (
+                        "translate(" +
+                            (function() {
+                                return (GAME.getBoundingClientRect().width / 2)
+                            })() + "px" +
+                        "," +
+                            (function() {
+                                return (GAME.getBoundingClientRect().height / 2)
+                            })() + "px" +
+                        ")"
+                    )
+                }, 10)
+
+            // Insertion
+                // Spawn Point
+                GAME.appendChild(spawnpoint)
+                spawnpoint.insertAdjacentHTML("beforebegin", "<!-- Spawn Point -->")
+
+            // Siblings
+            var spawnEnemy = setInterval(function() {
+                spawnNewEnemy()
+            }, 200)
+
+            function spawnNewEnemy() {
+                spawnpoint.insertAdjacentHTML(
+                    'afterend',
+                    '<div class="enemy shape" default left="' + (spawnpoint.getBoundingClientRect().right - (spawnpoint.clientWidth / 2)) + '" top="' + (spawnpoint.getBoundingClientRect().bottom - (spawnpoint.clientHeight / 2)) + '" style="' +
+                        'transform: translate(' +
+                            (spawnpoint.getBoundingClientRect().right - (spawnpoint.clientWidth / 2)) + 'px' +
+                        ', ' +
+                            (spawnpoint.getBoundingClientRect().bottom - (spawnpoint.clientHeight / 2)) + 'px' +
+                        ')' +
+                    '">' +
+                    '</div>'
+                )
+            }
+
+            /* Enemy */
+                // Modification
+                setInterval(function() {
+                    moveEnemies()
+                }, 1000)
+
+                    setInterval(function() {
+                        for (i = 0; i < get.html(".enemy", "_array").length; i++)
+                            set.attr(get.html(".enemy", i), "data-AI")
+                    }, 15000)
+
+                    // Move Enemies
+                    function moveEnemies() {
+                        // Update
+                        var enemy = get.html(".enemy", "_array")
+
+                        for (i = 0; i < enemy.length; i++) {
+                            enemy[i].left = parseFloat(get.attr(enemy[i], "left"))
+                            enemy[i].top = parseFloat(get.attr(enemy[i], "top"))
+
+                            if (!enemy[i].hasAttribute("data-AI"))
+                                if ((Math.random() * 10) > 5) {
+                                    enemy[i].left += (Math.random() * 100)
+                                    set.attr(enemy[i], "left", enemy[i].left)
+
+                                    enemy[i].top -= (Math.random() * 100)
+                                    set.attr(enemy[i], "top", enemy[i].top)
+                                }
+                                else {
+                                    enemy[i].left -= (Math.random() * 100)
+                                    set.attr(enemy[i], "left", enemy[i].left)
+
+                                    enemy[i].top += (Math.random() * 100)
+                                    set.attr(enemy[i], "top", enemy[i].top)
+                                }
+                            else {
+                                if (get.css("opacity", player) == 1) {
+                                    enemy[i].left = player.getBoundingClientRect().left
+                                    set.attr(enemy[i], "left", enemy[i].left)
+
+                                    enemy[i].top = player.getBoundingClientRect().top
+                                    set.attr(enemy[i], "top", enemy[i].top)
+                                }
+                                else {
+                                    if ((Math.random() * 10) > 5) {
+                                        enemy[i].left = (player.getBoundingClientRect().left + (Math.random()))
+                                        set.attr(enemy[i], "left", enemy[i].left)
+
+                                        enemy[i].top = (player.getBoundingClientRect().top - (Math.random()))
+                                        set.attr(enemy[i], "top", enemy[i].top)   
+                                    }
+                                    else {
+                                        enemy[i].left = (player.getBoundingClientRect().left - (Math.random()))
+                                        set.attr(enemy[i], "left", enemy[i].left)
+
+                                        enemy[i].top = (player.getBoundingClientRect().top + (Math.random()))
+                                        set.attr(enemy[i], "top", enemy[i].top)   
+                                    }
+                                }
+                            }
+
+                            enemy[i].style.transform = (
+                                "translate(" +
+                                    (function() {
+                                        if (
+                                            enemy[i].left > GAME.getBoundingClientRect().left &&
+                                            enemy[i].left < (GAME.getBoundingClientRect().right - enemy[i].clientWidth)
+                                        )
+                                            return enemy[i].left
+                                        else {
+                                            get.html(".enemy", i).style.opacity = 0
+                        
+                                            setTimeout(function() { del.html(get.html(".enemy", i)) }, 100)
+
+                                            if ((Math.random() * 10) > 5)
+                                                return spawnpoint.getBoundingClientRect().left + (Math.random() * 10)
+                                            else
+                                                return spawnpoint.getBoundingClientRect().left - (Math.random() * 10)
+                                        }
+                                    })() + "px" +
+                                ", " +
+                                    (function() {
+                                        if (
+                                            enemy[i].top > GAME.getBoundingClientRect().top &&
+                                            enemy[i].top < (GAME.getBoundingClientRect().bottom - enemy[i].clientHeight)
+                                        )
+                                            return enemy[i].top
+                                        else {
+                                            get.html(".enemy", i).style.opacity = 0
+                        
+                                            setTimeout(function() { del.html(get.html(".enemy", i)) }, 100)
+
+                                            if ((Math.random() * 10) > 5)
+                                                return spawnpoint.getBoundingClientRect().top + (Math.random() * 10)
+                                            else
+                                                return spawnpoint.getBoundingClientRect().top - (Math.random() * 10)
+                                        }
+                                    })() + "px" +
+                                ")"
+                            )
+                        }
+                    }
+
+            /* Timer */
+            var counter = 0
+
+            setInterval(function() {
+                if (!player.hasAttribute("data-dead"))
+                    counter++
+
+                get.html("#timer time").innerHTML = counter
+            }, 1000)
+
+            /* GAME OVER */
+            setInterval(function() {
+                for (i = 0; i < get.html(".enemy", "_array").length; i++) {
+                    if (
+                        // Horizontal
+                        (
+                            parseInt(player.getBoundingClientRect().left + (player.clientWidth / 2)) >= parseInt(get.html(".enemy", i).getBoundingClientRect().left)
+                                &&
+                            parseInt(player.getBoundingClientRect().left + (player.clientWidth / 2)) <= parseInt(get.html(".enemy", i).getBoundingClientRect().right)
+                        )
+
+                        &&
+
+                        // Vertical
+                        (
+                            parseInt(player.getBoundingClientRect().top + (player.clientHeight / 2)) >= parseInt(get.html(".enemy", i).getBoundingClientRect().top)
+                                &&
+                            parseInt(player.getBoundingClientRect().top + (player.clientHeight / 2)) <= parseInt(get.html(".enemy", i).getBoundingClientRect().bottom)
+                        )
+                    ) {
+                        if (
+                            !player.hasAttribute("data-hiding") &&
+                            get.css("opacity", player) == 1 &&
+                            get.css("opacity", get.html(".enemy", i)) == 1
+                        ) {
+                            set.attr(player, "data-dead")
+
+                            player.style.opacity = 0
+
+                            alert("GAME OVER!")
+                        }
+                    }
+                }
+            }, 100)
+        }
+    </script>
+</body>
+
+</html>
